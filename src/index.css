@@ -8,3 +8,7 @@
 *{
     font-family: 'Poppins';
 }
+
+li{
+    @apply text-gray-700
+}

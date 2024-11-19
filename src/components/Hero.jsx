@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Hero() {
   return (
@@ -15,9 +16,11 @@ function Hero() {
           ab! Lorem ipsum dolor sit, amet consectetur adipisicing elit.
           Recusandae, ipsam.
         </p>
-        <button className="px-8 py-2 rounded-2xl font-medium bg-gradient-to-tl from-teal-600 to-blue-500 text-white">
-          Github
-        </button>
+        <Link to={'https://github.com/indiedev2003'} target="_blank">
+          <button className="px-8 py-2 rounded-2xl font-medium bg-gradient-to-tl from-teal-600 to-blue-500 text-white">
+            Github
+          </button>
+        </Link>
       </div>
     </div>
   );

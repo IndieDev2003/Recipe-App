@@ -1,67 +1,62 @@
 import React, { useContext, useEffect, useState } from "react";
 import { MealContext } from "../context/MealContext";
-
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 function SingleMeals() {
   const { meal } = useContext(MealContext);
 
   const [mealData, setMealData] = useState({});
   const [steps, setSteps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const id = meal.meals[0].idMeal;
-  async function fetchMeal() {
-    try {
-      const response = await axios.get(
-        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`
-      );
-
-      response.data.meals[0];
-      setMealData(response.data.meals[0]);
-    } catch (error) {
-      //  (error)
-    }
-  }
-
-  const mealfor = {
-    id: mealData.idMeal,
-    name: mealData.strMeal,
-    category: mealData.strCategory,
-    area: mealData.strArea,
-    instructions: mealData.strInstructions,
-    image: mealData.strMealThumb,
-    tags: mealData.strTags ? mealData.strTags.split(",") : [],
-    youtube: mealData.strYoutube,
-    ingredients: [],
-  };
+  const { id } = useParams();
 
   useEffect(() => {
+    if (!id) return;
+
+    async function fetchMeal() {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`
+        );
+        const data = response.data.meals[0];
+        setMealData(data);
+        setSteps(data.strInstructions ? data.strInstructions.split(".") : []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchMeal();
-    mealData;
-  }, [mealData]);
+  }, [id]);
 
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = mealData[`strIngredient${i}`];
-    const space = "    - ";
     const measure = mealData[`strMeasure${i}`];
     if (ingredient && ingredient.trim()) {
-      ingredients.push(` ${ingredient} ${space} ${measure} `);
+      ingredients.push(`${ingredient} - ${measure}`);
     }
   }
 
-  setSteps(mealData.strInstructions.split("."))(
-    // const mealData = meal.meals[0].idMeal;
-    steps
-  );
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  //  (steps)
+
   return (
-    <div className="w-full mt-5">
+    <div className="w-full mt-5 mb-10">
       {/* Images Section */}
       <div className="relative flex w-full items-center justify-center">
         <img
           src={mealData.strMealThumb}
           className="h-40 w-[600px] object-cover object-center rounded-lg"
-          alt=""
+          alt={mealData.strMeal}
         />
         <h2 className="absolute -bottom-5 text-white bg-gray-600 px-8 py-2 rounded-lg">
           {mealData.strMeal}
@@ -92,9 +87,10 @@ function SingleMeals() {
 
       {/* Instructions */}
       <div>
+        <h2 className="text-3xl my-4">Instructions:</h2>
         <ol>
           {steps.map((step, index) => (
-            <li key={index}>{step}</li>
+            <li key={index}>{step.trim()}</li>
           ))}
         </ol>
       </div>
